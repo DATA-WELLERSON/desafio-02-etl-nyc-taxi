@@ -1,0 +1,22 @@
+[project]
+name = "etl-nyc-taxi"
+version = "0.1.0"
+description = "Pipeline ETL simples sobre o dataset NYC Yellow Taxi (Desafio 02 - Dados por Todos)"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "pandas>=2.2,<3",
+    "pyarrow>=19.0.0",
+    "ipykernel>=7.2.0",
+    "streamlit>=1.44.1",
+    "kagglehub",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

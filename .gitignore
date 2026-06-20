@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# uv / venv
+.venv/
+
+# Dados (grandes / gerados)
+data/input/
+data/output/
+*.parquet
+*.csv
+
+# Credenciais
+.kaggle/
+kaggle.json
+
+# Resíduos / SO
+_notion_*.png
+.DS_Store
+Thumbs.db
