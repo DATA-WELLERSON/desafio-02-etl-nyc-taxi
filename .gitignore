@@ -1,6 +1,0 @@
-__pycache__/
-*.py[cod]
-*.parquet
-.env
-.venv/
-venv/
