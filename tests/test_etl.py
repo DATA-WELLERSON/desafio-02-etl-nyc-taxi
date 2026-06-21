@@ -6,6 +6,7 @@ import pandas as pd
 
 from src.Extract import read_csv
 from src.Load import load
+from src.Transform import transform
 from src.Validate import validate
 
 
@@ -89,6 +90,40 @@ def test_validate_raises_on_missing_columns():
 
     with pytest.raises(ValueError, match="Colunas ausentes"):
         validate(df)
+
+
+def test_transform_creates_temporal_and_derived_columns():
+    out = transform(pd.DataFrame([_valid_row()]))
+    row = out.iloc[0]
+
+    # Temporais (2016-01-01 08:00 é uma sexta-feira de manhã)
+    assert row["pickup_date"] == "2016-01-01"
+    assert row["pickup_hour"] == 8
+    assert row["weekday"] == 4
+    assert row["weekday_name"] == "sexta"
+    assert bool(row["is_weekend"]) is False
+    assert row["shift"] == "manha"
+
+    # Métricas: 3 milhas em 20 min (1/3 h) = 9 mph; gorjeta 2/14
+    assert row["duration_min"] == 20.0
+    assert row["speed_mph"] == 9.0
+    assert row["tip_pct"] == round(2.0 / 14.0 * 100, 2)
+
+    # Faixas
+    assert row["distance_band"] == "media"   # 3 milhas
+    assert row["duration_band"] == "normal"  # 20 min
+
+
+def test_transform_handles_division_by_zero():
+    r = _valid_row()
+    r["fare_amount"] = 0.0     # tip_pct não pode virar inf/NaN
+    r["trip_distance"] = 0.0   # revenue_per_mile/speed idem
+
+    row = transform(pd.DataFrame([r])).iloc[0]
+
+    assert row["tip_pct"] == 0.0
+    assert row["revenue_per_mile"] == 0.0
+    assert row["speed_mph"] == 0.0
 
 
 def test_read_csv_returns_dataframe(tmp_path: Path):

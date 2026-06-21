@@ -80,3 +80,29 @@ SHIFTS = [
     (12, 18, "tarde"),
     (18, 24, "noite"),
 ]
+
+# ----------------------------------------------------------------------------- #
+# Transform — faixas, calendário e flags (Passo 4)
+# ----------------------------------------------------------------------------- #
+# Nomes dos dias da semana (índice 0=segunda ... 6=domingo, como em dt.weekday).
+WEEKDAY_NAMES = [
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado",
+    "domingo",
+]
+
+# Faixas de distância (milhas) -> rótulo.
+DISTANCE_BAND_BINS = [0, 2, 6, float("inf")]
+DISTANCE_BAND_LABELS = ["curta", "media", "longa"]
+
+# Faixas de duração (minutos) -> rótulo.
+DURATION_BAND_BINS = [0, 5, 30, float("inf")]
+DURATION_BAND_LABELS = ["muito_curta", "normal", "longa"]
+
+# Flag de anomalia combinada: velocidade alta E tarifa baixa ao mesmo tempo.
+ANOMALY_SPEED_MPH = 60.0
+ANOMALY_FARE = 5.0
