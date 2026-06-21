@@ -17,8 +17,10 @@ data/output/
 .kaggle/
 kaggle.json
 
-# Claude Code (memória interna dos agentes)
+# Claude Code (config pessoal / memória interna — agents/ ficam versionados)
 .claude/agent-memory/
+.claude/settings.local.json
+.claude/settings.json
 
 # Resíduos / SO
 _notion_*.png
