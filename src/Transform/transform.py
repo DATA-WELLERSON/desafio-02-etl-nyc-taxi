@@ -11,15 +11,9 @@ divide → ``fillna(0)``, evitando ``inf``/``NaN`` que quebrariam as agregaçõe
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
-from src import config
-
-
-def _safe_divide(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
-    """Divisão protegida: zero no denominador vira NaN e o resultado final vira 0."""
-    return (numerator / denominator.replace(0, np.nan)).fillna(0.0)
+from src import config, derive
 
 
 def transform(df: pd.DataFrame) -> pd.DataFrame:
@@ -51,16 +45,15 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # --- Métricas derivadas ---
-    duration_min = (dropoff - pickup).dt.total_seconds() / 60.0
+    duration_min = derive.duration_minutes(pickup, dropoff)
     df["duration_min"] = duration_min.round(2)
 
-    hours = duration_min / 60.0
-    df["speed_mph"] = _safe_divide(df["trip_distance"], hours).round(2)
-    df["tip_pct"] = _safe_divide(df["tip_amount"], df["fare_amount"]).mul(100).round(2)
+    df["speed_mph"] = derive.speed_mph(df["trip_distance"], duration_min).round(2)
+    df["tip_pct"] = derive.safe_divide(df["tip_amount"], df["fare_amount"]).mul(100).round(2)
 
     # --- Rentabilidade ---
-    df["revenue_per_min"] = _safe_divide(df["total_amount"], duration_min).round(2)
-    df["revenue_per_mile"] = _safe_divide(df["total_amount"], df["trip_distance"]).round(2)
+    df["revenue_per_min"] = derive.safe_divide(df["total_amount"], duration_min).round(2)
+    df["revenue_per_mile"] = derive.safe_divide(df["total_amount"], df["trip_distance"]).round(2)
 
     # --- Faixas (categóricas) ---
     df["distance_band"] = pd.cut(

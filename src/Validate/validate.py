@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from src import config
+from src import config, derive
 
 
 # Colunas que a validação precisa para aplicar todas as regras.
@@ -60,13 +60,10 @@ def validate(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     df[config.DROPOFF_DATETIME] = pd.to_datetime(df[config.DROPOFF_DATETIME], errors="coerce")
 
     # Auxiliares derivados das datas (usados em regras de duração e velocidade).
-    duration_min = (
-        df[config.DROPOFF_DATETIME] - df[config.PICKUP_DATETIME]
-    ).dt.total_seconds() / 60.0
-
-    # Velocidade média (mph), protegendo a divisão por zero (duração 0 -> NaN).
-    hours = (duration_min / 60.0).replace(0, pd.NA)
-    speed_mph = df["trip_distance"] / hours
+    duration_min = derive.duration_minutes(
+        df[config.PICKUP_DATETIME], df[config.DROPOFF_DATETIME]
+    )
+    speed_mph = derive.speed_mph(df["trip_distance"], duration_min)
 
     # 2) Relatório de nulos por coluna (só as que têm algum nulo).
     nulls = df.isna().sum()
