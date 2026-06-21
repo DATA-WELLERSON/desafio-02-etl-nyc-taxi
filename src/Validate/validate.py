@@ -13,6 +13,7 @@ from __future__ import annotations
 import pandas as pd
 
 from src import config, derive
+from src.Validate.rules import outside_bbox
 
 
 # Colunas que a validação precisa para aplicar todas as regras.
@@ -32,18 +33,6 @@ REQUIRED_COLUMNS = {
     "total_amount",
     *config.FARE_COMPONENTS,
 }
-
-
-def _outside_bbox(lon: pd.Series, lat: pd.Series) -> pd.Series:
-    """``True`` onde a coordenada cai fora do bounding box de NYC (nulo também reprova)."""
-    return (
-        lon.isna()
-        | lat.isna()
-        | (lon < config.NYC_LON_MIN)
-        | (lon > config.NYC_LON_MAX)
-        | (lat < config.NYC_LAT_MIN)
-        | (lat > config.NYC_LAT_MAX)
-    )
 
 
 def validate(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
@@ -94,8 +83,8 @@ def validate(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     rules["duracao"] = (duration_min < config.MIN_DURATION_MIN) | (
         duration_min > config.MAX_DURATION_MIN
     )
-    rules["coord_pickup"] = _outside_bbox(df[config.PICKUP_LON], df[config.PICKUP_LAT])
-    rules["coord_dropoff"] = _outside_bbox(df[config.DROPOFF_LON], df[config.DROPOFF_LAT])
+    rules["coord_pickup"] = outside_bbox(df[config.PICKUP_LON], df[config.PICKUP_LAT])
+    rules["coord_dropoff"] = outside_bbox(df[config.DROPOFF_LON], df[config.DROPOFF_LAT])
 
     # --- Opcionais ---
     rules["velocidade"] = speed_mph > config.MAX_SPEED_MPH

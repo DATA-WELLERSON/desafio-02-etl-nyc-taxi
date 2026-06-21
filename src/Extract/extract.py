@@ -52,8 +52,3 @@ def extract(
         ) from exc
 
     return df
-
-
-def read_csv(path: str, nrows: int | None = None) -> pd.DataFrame:
-    """Lê um CSV local já baixado (alternativa ao download via kagglehub)."""
-    return pd.read_csv(path, nrows=nrows)
