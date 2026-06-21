@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.Aggregate import base_metrics, by_day, percentiles, quality_by_rule
 from src.Extract import read_csv
 from src.Load import load
 from src.Transform import transform
@@ -124,6 +125,50 @@ def test_transform_handles_division_by_zero():
     assert row["tip_pct"] == 0.0
     assert row["revenue_per_mile"] == 0.0
     assert row["speed_mph"] == 0.0
+
+
+def _other_day_row() -> dict:
+    """Igual à corrida boa, mas em outro dia (2016-01-02)."""
+    r = _valid_row()
+    r["tpep_pickup_datetime"] = "2016-01-02 08:00:00"
+    r["tpep_dropoff_datetime"] = "2016-01-02 08:20:00"
+    return r
+
+
+def test_aggregate_base_metrics():
+    df = transform(pd.DataFrame([_valid_row(), _valid_row()]))
+    out = base_metrics(df)
+
+    assert out.loc[0, "total_trips"] == 2
+    assert out.loc[0, "avg_distance"] == 3.0
+    assert out.loc[0, "total_revenue"] == round(17.3 * 2, 2)
+
+
+def test_aggregate_by_day_with_pct():
+    # 2 corridas no dia 01, 1 no dia 02
+    df = transform(pd.DataFrame([_valid_row(), _valid_row(), _other_day_row()]))
+    out = by_day(df)
+
+    assert list(out["pickup_date"]) == ["2016-01-01", "2016-01-02"]
+    assert out.set_index("pickup_date").loc["2016-01-01", "total_trips"] == 2
+    assert round(out["pct_trips"].sum()) == 100  # participações somam 100%
+
+
+def test_aggregate_percentiles():
+    df = transform(pd.DataFrame([_valid_row() for _ in range(3)]))
+    out = percentiles(df)
+
+    assert list(out["percentile"]) == ["p50", "p90", "p95"]
+    assert "duration_min" in out.columns
+
+
+def test_aggregate_quality_by_rule():
+    # 2 linhas iguais -> a 2ª reprova na regra "duplicado"
+    _, report = validate(pd.DataFrame([_valid_row(), _valid_row()]))
+    out = quality_by_rule(report)
+
+    assert {"rule", "failures", "failure_pct"} <= set(out.columns)
+    assert out.loc[out["rule"] == "duplicado", "failures"].iloc[0] == 1
 
 
 def test_read_csv_returns_dataframe(tmp_path: Path):

@@ -106,3 +106,11 @@ DURATION_BAND_LABELS = ["muito_curta", "normal", "longa"]
 # Flag de anomalia combinada: velocidade alta E tarifa baixa ao mesmo tempo.
 ANOMALY_SPEED_MPH = 60.0
 ANOMALY_FARE = 5.0
+
+# ----------------------------------------------------------------------------- #
+# Aggregate — agregações e métricas (Passo 5)
+# ----------------------------------------------------------------------------- #
+# Casas decimais ao agrupar rotas por coordenada (3 ~ 110 m; agrupa origem/destino).
+ROUTE_COORD_DECIMALS = 3
+# Percentis padrão calculados para duração, distância e tarifa.
+PERCENTILES = [0.5, 0.9, 0.95]
