@@ -25,9 +25,6 @@ variáveis `KAGGLE_USERNAME` / `KAGGLE_KEY`) para o download automático do data
 # pipeline completo (gera data/output/trips.parquet)
 uv run python etl.py
 
-# amostra para desenvolvimento (arquivos têm ~2 GB)
-uv run python etl.py --nrows 100000
-
 # dashboard
 uv run streamlit run dashboard.py
 
@@ -35,13 +32,19 @@ uv run streamlit run dashboard.py
 uv run pytest
 ```
 
+Os parâmetros do pipeline (arquivo CSV, caminho de saída e `NROWS`) são
+configurados editando a seção **CONFIGURAÇÃO** no topo do `etl.py`. Como os CSVs
+têm ~2 GB, use `NROWS = 100_000` para uma amostra em desenvolvimento e `NROWS = None`
+para processar o arquivo inteiro.
+
 ## Estrutura
 
 ```
 etl.py            # orquestrador: extract -> validate -> transform -> load
 dashboard.py      # app Streamlit (KPIs + views)
 src/
-  config.py       # constantes (dataset, bbox NYC, regras, paths)
+  config.py       # constantes (dataset, bbox NYC, regras, faixas, paths)
+  derive.py       # cálculos compartilhados (duração, velocidade, divisão segura)
   Extract/        # leitura do CSV via kagglehub
   Validate/       # regras de anomalia + quality score
   Transform/      # novas colunas (hora, turno, velocidade, faixas...)
